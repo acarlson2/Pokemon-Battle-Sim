@@ -13,7 +13,7 @@ namespace Pokemon_Battle_Sim
 			_client = client;
 		}
 
-		public void RequestPokemon(string name)
+		public void DisplayPokemonData(string name)
 		{
 			var pokeURL = $"https://pokeapi.co/api/v2/pokemon/{name.ToLower()}";
 
