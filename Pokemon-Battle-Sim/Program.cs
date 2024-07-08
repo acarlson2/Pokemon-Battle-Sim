@@ -1,3 +1,18 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+﻿namespace Pokemon_Battle_Sim
+{
+    public class Program
+    {
+        static void Main(string[] args)
+        {
+            HttpClient client = new HttpClient();
+
+            BattleSimulator sim = new BattleSimulator(client);
+
+            Console.WriteLine("Choose a Pokemon:");
+            string name = Console.ReadLine();
+
+            sim.RequestPokemon(name);
+        }
+    }
+}
 
