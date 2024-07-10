@@ -11,7 +11,7 @@
             Console.WriteLine("Choose a Pokemon:");
             string name = Console.ReadLine();
 
-            sim.RequestPokemon(name);
+            sim.DisplayPokemonData(name);
         }
     }
 }
