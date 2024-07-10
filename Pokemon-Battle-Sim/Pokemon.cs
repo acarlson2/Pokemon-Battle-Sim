@@ -22,8 +22,6 @@ namespace Pokemon_Battle_Sim
 
 		public void IChooseYou(string name, int level)
 		{
-            //var pokeURL = $"https://pokeapi.co/api/v2/pokemon/{name.ToLower()}";
-
             var response = _client.GetStringAsync(pokeURL + $"pokemon/{name.ToLower()}").Result;
 
             var data = JObject.Parse(response);
