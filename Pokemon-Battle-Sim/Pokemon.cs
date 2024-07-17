@@ -1,6 +1,7 @@
 ﻿using System;
 using static System.Net.WebRequestMethods;
 using Newtonsoft.Json.Linq;
+using System.Xml.Linq;
 
 namespace Pokemon_Battle_Sim
 {
@@ -10,9 +11,12 @@ namespace Pokemon_Battle_Sim
         string pokeURL = $"https://pokeapi.co/api/v2/";
 
 		string _name;
+        string _nature;
 		int _level;
+        double _weight;
+        double _height;
 		List<string> _typeList;
-		List<int> _statList; //{HP, Attack, Defense, Special Attack, Special Defense, Speed}
+		List<double> _statList; //{HP, Attack, Defense, Special Attack, Special Defense, Speed}
 		List<Move> _moveList;
 
 		public Pokemon(HttpClient client)
@@ -20,14 +24,17 @@ namespace Pokemon_Battle_Sim
 			_client = client;
 		}
 
-		public void IChooseYou(string name, int level)
+		public void IChooseYou(string name, int level, string nature)
 		{
             var response = _client.GetStringAsync(pokeURL + $"pokemon/{name.ToLower()}").Result;
 
             var data = JObject.Parse(response);
 
-			name = (string) data.GetValue("name");
+			_name = name;
 			_level = level;
+            _weight = (double)data.GetValue("weight") / 10; //weight in kg
+            _height = (double)data.GetValue("height") / 10; //height in m
+            _nature = nature;
 
 			var types = data.SelectToken("types");
 			for(int i = 0; i < types.Count(); i++)
@@ -38,7 +45,7 @@ namespace Pokemon_Battle_Sim
             var stats = data.SelectToken("stats");
 			for(int i = 0; i < stats.Count(); i++)
 			{
-				_statList.Add((int)data.GetValue($"stats[{i}].base_stat"));
+				_statList.Add((double)data.GetValue($"stats[{i}].base_stat"));
 			}
         }
 
@@ -87,6 +94,57 @@ namespace Pokemon_Battle_Sim
             four.MoveUses = (int)fourMove.SelectToken("pp");
             four.MovePriority = (int)fourMove.SelectToken("priority");
             _moveList.Add(four);
+        }
+
+        public void StatCalculation(int[] iv, int[] ev)
+        {
+            var natureResponse = _client.GetStringAsync(pokeURL + $"natures/{_nature.ToLower()}").Result;
+            var natureData = JObject.Parse(natureResponse);
+
+            _statList[0] = (((2 * _statList[0] + iv[0] + (ev[0] / 4)) * _level) / 100) + _level + 10;
+
+            for(int i = 1; i < _statList.Count; i++)
+            {
+                _statList[i] = ((2 * _statList[i] + iv[i] + (ev[i] / 4) * _level) / 100) + 5;
+            }
+
+            switch((string)natureData.SelectToken("increased_stat.name"))
+            {
+                case "attack":
+                    _statList[1] *= 1.1;
+                    break;
+                case "defense":
+                    _statList[2] *= 1.1;
+                    break;
+                case "special-attack":
+                    _statList[3] *= 1.1;
+                    break;
+                case "special-defense":
+                    _statList[4] *= 1.1;
+                    break;
+                case "speed":
+                    _statList[5] *= 1.1;
+                    break;
+            }
+
+            switch ((string)natureData.SelectToken("decreased_stat.name"))
+            {
+                case "attack":
+                    _statList[1] *= 0.9;
+                    break;
+                case "defense":
+                    _statList[2] *= 0.9;
+                    break;
+                case "special-attack":
+                    _statList[3] *= 0.9;
+                    break;
+                case "special-defense":
+                    _statList[4] *= 0.9;
+                    break;
+                case "speed":
+                    _statList[5] *= 0.9;
+                    break;
+            }
         }
 	}
 }
