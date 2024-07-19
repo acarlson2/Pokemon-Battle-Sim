@@ -1,5 +1,6 @@
 ﻿namespace Pokemon_Battle_Sim
 {
+    // /Users/aaroncarlson/Projects/Pokemon-Battle-Sim
     public class Program
     {
         static void Main(string[] args)
